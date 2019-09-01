@@ -2,7 +2,7 @@
 import json
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import requests
 
@@ -19,7 +19,13 @@ class WikidataSession:
 
     URL = "https://www.wikidata.org/w/api.php"
 
-    def __init__(self, username: str, password: str, user_agent=f"{name} {version}"):
+    def __init__(
+        self,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        token: Optional[str] = None,
+        user_agent=f"{name} {version}",
+    ):
         """
         Create a wikidata session by logging in and getting the token
         """
@@ -27,7 +33,10 @@ class WikidataSession:
         self.password = password
         self.headers = {"User-Agent": user_agent}
         self.S = requests.Session()
-        self.login()
+        if username is not None and password is not None:
+            self.login()
+        if token is not None:
+            self.CSRF_TOKEN = token
 
     def login(self):
         # Ask for a token
