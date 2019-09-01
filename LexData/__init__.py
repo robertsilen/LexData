@@ -1,13 +1,13 @@
 # -*-coding:utf-8-*
 import json
 import logging
-from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import requests
 
 name = "LexData"
 version = "0.1.3"
+user_agent = "%s %s" % (name, version)
 
 
 class WikidataSession:
@@ -24,7 +24,7 @@ class WikidataSession:
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
-        user_agent=f"{name} {version}",
+        user_agent=user_agent,
     ):
         """
         Create a wikidata session by logging in and getting the token
@@ -102,12 +102,12 @@ class WikidataSession:
         return R.json()
 
 
-@dataclass
 class Language:
     """Dataclass representing a language"""
 
-    short: str
-    qid: str
+    def __init__(self, short, qid):
+        self.short = short
+        self.qid = qid
 
 
 class Claim(dict):
@@ -264,7 +264,7 @@ class Lexeme(dict):
 
         """
         # Create the json with the sense's data
-        data_sense: Dict[str, Dict[str, Dict[str, str]]] = {"glosses": {}}
+        data_sense = {"glosses": {}}
         for lang, gloss in glosses.items():
             data_sense["glosses"][lang] = {"value": gloss, "language": lang}
 
