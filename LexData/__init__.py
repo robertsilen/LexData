@@ -77,6 +77,8 @@ class WikidataSession:
         """
         if data.get("token") == "__AUTO__":
             data["token"] = self.CSRF_TOKEN
+        if "assertuser" not in data and self.username is not None:
+            data["assertuser"] = self.username
         R = self.S.post(self.URL, data=data, headers=self.headers, auth=self.auth)
         if R.status_code != 200:
             raise Exception(
