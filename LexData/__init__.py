@@ -24,6 +24,7 @@ class WikidataSession:
         username: Optional[str] = None,
         password: Optional[str] = None,
         token: Optional[str] = None,
+        auth: Optional[str] = None,
         user_agent=user_agent,
     ):
         """
@@ -31,6 +32,7 @@ class WikidataSession:
         """
         self.username = username
         self.password = password
+        self.auth = auth
         self.headers = {"User-Agent": user_agent}
         self.S = requests.Session()
         if username is not None and password is not None:
@@ -75,7 +77,7 @@ class WikidataSession:
         """
         if data.get("token") == "__AUTO__":
             data["token"] = self.CSRF_TOKEN
-        R = self.S.post(self.URL, data=data, headers=self.headers)
+        R = self.S.post(self.URL, data=data, headers=self.headers, auth=self.auth)
         if R.status_code != 200:
             raise Exception(
                 "POST was unsuccessfull ({}): {}".format(R.status_code, R.text)
