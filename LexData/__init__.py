@@ -138,6 +138,39 @@ class Claim(dict):
         return self["mainsnak"]["datavalue"]["type"]
 
     @property
+    def property(self):
+        """
+        Return the property of the claim.
+
+        :rtype: str
+        """
+        return self["mainsnak"]["property"]
+
+    @property
+    def rank(self):
+        """
+        Return the rank of the claim.
+
+        :rtype: str
+        """
+        return self["rank"]
+
+    @property
+    def numeric_rank(self):
+        """
+        Return the rank of the claim as integer.
+
+        :rtype: int
+        """
+        if self.rank == "normal":
+            return 0
+        elif self.rank == "preferred":
+            return 1
+        elif self.rank == "deprecated":
+            return -1
+        raise NotImplementedError("Unknown or invalid rank {}".format(self.rank))
+
+    @property
     def pure_value(self):
         """
         Return just the 'pure' value, what this is depends on the type of the value:
@@ -166,6 +199,12 @@ class Claim(dict):
         if vtype == "globecoordinate":
             return (float(value["latitude"]), float(value["longitude"]))
         raise NotImplementedError
+
+    def __repr__(self) -> str:
+        return "<Claim '{}'>".format(repr(self.value()))
+
+    def __str__(self) -> str:
+        return super().__repr__()
 
 
 class Form(dict):
