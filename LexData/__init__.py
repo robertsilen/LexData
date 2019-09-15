@@ -121,6 +121,52 @@ class Claim(dict):
         super().__init__()
         self.update(claim)
 
+    @property
+    def value(self):
+        """
+        Return the value of the claim. The type depends on the data type.
+        """
+        return self["mainsnak"]["datavalue"]["value"]
+
+    @property
+    def type(self):
+        """
+        Return the data type of the claim.
+
+        :rtype: str
+        """
+        return self["mainsnak"]["datavalue"]["type"]
+
+    @property
+    def pure_value(self):
+        """
+        Return just the 'pure' value, what this is depends on the type of the value:
+        - wikibase-entity: the id, including 'L/Q/P'-prefix
+        - string: the string
+        - manolingualtext: the text as string
+        - quantity: the amount as float
+        - time: the timestamp as string in format ISO 8601
+        - globecoordinate: tuple of latitude and longitude as floats
+
+        Be aware that for most types this is not the full information stored in
+        the value.
+        """
+        value = self.value()
+        vtype = self.type()
+        if vtype == "wikibase-entityid":
+            return value["id"]
+        if vtype == "string":
+            return value
+        if vtype == "monolingualtext":
+            return value["text"]
+        if vtype == "quantity":
+            return float(value["amount"])
+        if vtype == "time":
+            return value["time"]
+        if vtype == "globecoordinate":
+            return (float(value["latitude"]), float(value["longitude"]))
+        raise NotImplementedError
+
 
 class Form(dict):
     """Wrapper around a dict to represent a From"""
