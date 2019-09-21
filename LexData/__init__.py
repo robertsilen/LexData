@@ -223,6 +223,7 @@ class Form(dict):
         super().__init__()
         self.update(form)
 
+    @property
     def form(self) -> str:
         """
         String of the form value ("representation")
@@ -231,6 +232,7 @@ class Form(dict):
         """
         return list(self["representations"].values())[0]["value"]
 
+    @property
     def claims(self) -> Dict[str, List[Claim]]:
         """
         All the claims of the Form
@@ -240,7 +242,7 @@ class Form(dict):
         return {k: [Claim(c) for c in v] for k, v in self["claims"].items()}
 
     def __repr__(self) -> str:
-        return "<Form '{}'>".format(self.form())
+        return "<Form '{}'>".format(self.form)
 
     def __str__(self) -> str:
         return super().__repr__()
@@ -269,6 +271,7 @@ class Sense(dict):
                 lang = list(self["glosses"].keys())[0]
         return self["glosses"][lang]["value"]
 
+    @property
     def claims(self) -> Dict[str, List[Claim]]:
         """
         All the claims of the Sense
