@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 import requests
 
 name = "LexData"
-version = "0.1.5"
+version = "0.1.5.3"
 user_agent = "%s %s" % (name, version)
 
 
@@ -117,18 +117,21 @@ class Language:
 class Claim(dict):
     """Wrapper around a dict to represent a Claim"""
 
+    # Hack needed to define a property called property
+    property_decorator = property
+
     def __init__(self, claim: Dict):
         super().__init__()
         self.update(claim)
 
-    @property
+    @property_decorator
     def value(self):
         """
         Return the value of the claim. The type depends on the data type.
         """
         return self["mainsnak"]["datavalue"]["value"]
 
-    @property
+    @property_decorator
     def type(self):
         """
         Return the data type of the claim.
@@ -137,7 +140,7 @@ class Claim(dict):
         """
         return self["mainsnak"]["datavalue"]["type"]
 
-    @property
+    @property_decorator
     def property(self):
         """
         Return the property of the claim.
@@ -146,7 +149,7 @@ class Claim(dict):
         """
         return self["mainsnak"]["property"]
 
-    @property
+    @property_decorator
     def rank(self):
         """
         Return the rank of the claim.
@@ -155,7 +158,7 @@ class Claim(dict):
         """
         return self["rank"]
 
-    @property
+    @property_decorator
     def numeric_rank(self):
         """
         Return the rank of the claim as integer.
@@ -170,7 +173,7 @@ class Claim(dict):
             return -1
         raise NotImplementedError("Unknown or invalid rank {}".format(self.rank))
 
-    @property
+    @property_decorator
     def pure_value(self):
         """
         Return just the 'pure' value, what this is depends on the type of the value:
@@ -184,8 +187,8 @@ class Claim(dict):
         Be aware that for most types this is not the full information stored in
         the value.
         """
-        value = self.value()
-        vtype = self.type()
+        value = self.value
+        vtype = self.type
         if vtype == "wikibase-entityid":
             return value["id"]
         if vtype == "string":
