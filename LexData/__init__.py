@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 import requests
 
 name = "LexData"
-version = "0.1.6"
+version = "0.1.7"
 user_agent = "%s %s" % (name, version)
 
 
@@ -209,7 +209,7 @@ class Claim(dict):
         raise NotImplementedError
 
     def __repr__(self) -> str:
-        return "<Claim '{}'>".format(repr(self.value()))
+        return "<Claim '{}'>".format(repr(self.value))
 
     def __str__(self) -> str:
         return super().__repr__()
