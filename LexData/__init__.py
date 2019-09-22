@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 import requests
 
 name = "LexData"
-version = "0.1.5.3"
+version = "0.1.6"
 user_agent = "%s %s" % (name, version)
 
 
@@ -18,6 +18,7 @@ class WikidataSession:
     """
 
     URL = "https://www.wikidata.org/w/api.php"
+    assertUser = None
 
     def __init__(
         self,
@@ -39,6 +40,10 @@ class WikidataSession:
             self.login()
         if token is not None:
             self.CSRF_TOKEN = token
+        # After logging in enable 'assertUser'-feature of the Mediawiki-API to
+        # make sure to never edit accidentally as IP
+        if username is not None:
+            self.assertUser = username
 
     def login(self):
         # Ask for a token
@@ -77,8 +82,8 @@ class WikidataSession:
         """
         if data.get("token") == "__AUTO__":
             data["token"] = self.CSRF_TOKEN
-        if "assertuser" not in data and self.username is not None:
-            data["assertuser"] = self.username
+        if "assertuser" not in data and self.assertUser is not None:
+            data["assertuser"] = self.assertUser
         R = self.S.post(self.URL, data=data, headers=self.headers, auth=self.auth)
         if R.status_code != 200:
             raise Exception(
