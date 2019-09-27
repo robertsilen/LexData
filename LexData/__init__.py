@@ -114,7 +114,7 @@ class WikidataSession:
 class Language:
     """Dataclass representing a language"""
 
-    def __init__(self, short, qid):
+    def __init__(self, short: str, qid: str):
         self.short = short
         self.qid = qid
 
@@ -379,9 +379,10 @@ class Lexeme(dict):
         logging.info("---Created sense: idsense = %s", idSense)
 
         # Add the claims
-        self.__setClaims__(idSense, claims)
-        self.getLex(self["id"])
+        if claims:
+            self.__setClaims__(idSense, claims)
 
+        self.getLex(self["id"])
         return idSense
 
     def createForm(
@@ -430,7 +431,8 @@ class Lexeme(dict):
         logging.info("---Created form: idForm = %s", idForm)
 
         # Add the claims
-        self.__setClaims__(idForm, claims)
+        if claims:
+            self.__setClaims__(idForm, claims)
 
         self.getLex(self["id"])
         return idForm
