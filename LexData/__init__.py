@@ -302,7 +302,7 @@ class Lexeme(dict):
 
         PARAMS = {"action": "wbgetentities", "format": "json", "ids": idLex}
 
-        DATA = self.repo.post(PARAMS)
+        DATA = self.repo.get(PARAMS)
 
         self.update(DATA["entities"][idLex])
 
