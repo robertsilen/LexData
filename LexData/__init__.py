@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 import requests
 
 name = "LexData"
-version = "0.1.7"
+version = "0.1.8"
 user_agent = "%s %s" % (name, version)
 
 
