@@ -386,14 +386,14 @@ class Lexeme(dict):
         return idSense
 
     def createForm(
-        self, form: str, infosGram: str, language: Language = None, claims=None
+        self, form: str, infosGram: List[str], language: Language = None, claims=None
     ) -> str:
         """Create a form for the lexeme
 
         :param form: the new form to add
         :type  form: str
         :param infosGram: grammatical features
-        :type  infosGram: str
+        :type  infosGram: List[str]
         :param language: the language of the form
         :type  language: Optional[Language]
         :param claims: claims to add to the new form (Default value = None) -> st)
