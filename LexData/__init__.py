@@ -528,15 +528,12 @@ def get_or_create_lexeme(repo, lemma: str, lang: Language, catLex: str) -> Lexem
 
     for item in DATA["search"]:
         # if the lexeme exists
-        if (
-            item["match"]["text"] == lemma
-            and item["match"]["language"] == lang.short
-            and catLex == Lexeme(repo, item["id"])["lexicalCategory"]
-        ):
+        if item["label"] == lemma:
             idLex = item["id"]
-
-            logging.info("--Found lexeme, id = %s", idLex)
-            return Lexeme(repo, idLex)
+            lexeme = Lexeme(repo, idLex)
+            if lexeme["language"] == lang.qid and lexeme["lexicalCategory"] == catLex:
+                logging.info("--Found lexeme, id = %s", idLex)
+                return lexeme
 
     # Not found, create the lexeme
     return create_lexeme(repo, lemma, lang, catLex)
