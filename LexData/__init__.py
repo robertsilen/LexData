@@ -577,6 +577,7 @@ def create_lexeme(repo, lemma: str, lang: Language, catLex: str, claims=None) ->
     logging.info("--Created lexeme : idLex = %s", idLex)
     lexeme = Lexeme(repo, idLex)
 
-    lexeme.createClaims(claims)
+    if claims:
+        lexeme.createClaims(claims)
 
     return lexeme
