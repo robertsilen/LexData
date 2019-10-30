@@ -506,15 +506,25 @@ def get_or_create_lexeme(repo, lemma: str, lang: Language, catLex: str) -> Lexem
 
     """
 
+    # the language we search in actually doesn't really matter
+    # set it nevertheless, except if it is a Language without ISO code
+    if lang.short[:3] == "mis":
+        searchlang = "en"
+    else:
+        searchlang = lang.short
+
     PARAMS = {
         "action": "wbsearchentities",
-        "language": lang.short,
+        "language": searchlang,
         "type": "lexeme",
         "search": lemma,
         "format": "json",
     }
 
     DATA = repo.get(PARAMS)
+
+    if "error" in DATA:
+        raise Exception(DATA["error"])
 
     for item in DATA["search"]:
         # if the lexeme exists
