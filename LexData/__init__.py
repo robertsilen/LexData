@@ -274,7 +274,10 @@ class Sense(dict):
 
         :rtype: Dict[str, List[Claim]]
         """
-        return {k: [Claim(c) for c in v] for k, v in self["claims"].items()}
+        if self["claims"]:
+            return {k: [Claim(c) for c in v] for k, v in self["claims"].items()}
+        else:
+            return {}
 
     def __repr__(self) -> str:
         return "<Sense '{}'>".format(self.glosse())
