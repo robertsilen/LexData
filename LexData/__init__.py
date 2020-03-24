@@ -1,6 +1,7 @@
 # -*-coding:utf-8-*
 import json
 import logging
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import requests
@@ -111,12 +112,12 @@ class WikidataSession:
         return R.json()
 
 
+@dataclass
 class Language:
     """Dataclass representing a language"""
 
-    def __init__(self, short: str, qid: str):
-        self.short = short
-        self.qid = qid
+    short: str
+    qid: str
 
 
 class Claim(dict):
@@ -364,7 +365,7 @@ class Lexeme(dict):
 
         """
         # Create the json with the sense's data
-        data_sense = {"glosses": {}}
+        data_sense: Dict[str, Dict[str, Dict[str, str]]] = {"glosses": {}}
         for lang, gloss in glosses.items():
             data_sense["glosses"][lang] = {"value": gloss, "language": lang}
 
