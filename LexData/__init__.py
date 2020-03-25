@@ -226,6 +226,56 @@ class Entity(dict):
         else:
             return {}
 
+    # TODO: make compatible with type Claim
+    def __setClaims__(self, repo: WikidataSession, claims: Dict[str, List[str]]):
+        """
+        Add claims to the entity (Lexeme, Form or Sense)
+
+        :param repo: Wikidata Session to use
+        :param claims: The set of claims to be added
+        """
+        for cle, values in claims.items():
+            for value in values:
+                self.__setClaim__(repo, cle, value)
+
+    def __setClaim__(self, repo: WikidataSession, idProp: str, idItem: str):
+        """
+        Add a claim to the entity
+
+        :param repo: Wikidata Session to use
+        :param idProp: id of the property
+        :param idItem: id of the Item
+        """
+
+        claim_value = json.dumps({"entity-type": "item", "numeric-id": idItem[1:]})
+
+        PARAMS = {
+            "action": "wbcreateclaim",
+            "format": "json",
+            "entity": self["id"],
+            "snaktype": "value",
+            "bot": "1",
+            "property": idProp,
+            "value": claim_value,
+            "token": "__AUTO__",
+        }
+
+        DATA = repo.post(PARAMS)
+        try:
+            assert "claim" in DATA
+            addedclaim = DATA["claim"]
+            logging.info("---claim added")
+        except Exception as e:
+            raise Exception("Unknown error adding claim", e)
+
+        # Add the created claim to the entity
+        if self.get("claims", []) == []:
+            self["claims"] = {idProp: addedclaim}
+        elif idProp in self.claims:
+            self.claims[idProp].append(addedclaim)
+        else:
+            self.claims[idProp] = [addedclaim]
+
     def __str__(self) -> str:
         return super().__repr__()
 
@@ -360,14 +410,17 @@ class Lexeme(Entity):
             "data": json.dumps(data_sense),
         }
         DATA = self.repo.post(PARAMS)
+        addedSense = DATA["sense"]
         idSense = DATA["sense"]["id"]
         logging.info("---Created sense: idsense = %s", idSense)
 
         # Add the claims
         if claims:
-            self.__setClaims__(idSense, claims)
+            addedSense.__setClaims__(self.repo, claims)
 
-        self.getLex(self["id"])
+        # Add the created form to the local lexeme
+        self["senses"].append(addedSense)
+
         return idSense
 
     def createForm(
@@ -412,14 +465,17 @@ class Lexeme(Entity):
             "data": data_form,
         }
         DATA = self.repo.post(PARAMS)
+        addedForm = DATA["form"]
         idForm = DATA["form"]["id"]
         logging.info("---Created form: idForm = %s", idForm)
 
         # Add the claims
         if claims:
-            self.__setClaims__(idForm, claims)
+            addedForm.__setClaims__(self.repo, claims)
 
-        self.getLex(self["id"])
+        # Add the created form to the local lexeme
+        self["forms"].append(addedForm)
+
         return idForm
 
     def createClaims(self, claims):
@@ -428,51 +484,10 @@ class Lexeme(Entity):
         :param claims: The set of claims to be added
 
         """
-        self.__setClaims__(self["id"], claims)
+        self.__setClaims__(self.repo, claims)
 
-    def __setClaims__(self, parent: str, claims):
-        """
-        Add claims to a Lexeme, Form or Sense
-
-        :type  parent: string
-        :param parent: the id of the Lexeme/Form/Sense
-        :type  claims: dict(List[dict()])
-        :param claims: The set of claims to be added
-        """
-        for cle, values in claims.items():
-            for value in values:
-                self.__setClaim__(parent, cle, value)
-        self.getLex(self["id"])
-
-    def __setClaim__(self, parent: str, idProp: str, idItem: str):
-        """
-        Add a claim to an existing lexeme/form/sense
-
-        :type  parent: string
-        :param parent: the id of the Lexeme/Form/Sense
-        :param idProp: id of the property
-        :param idItem: id of the Item
-        """
-
-        claim_value = json.dumps({"entity-type": "item", "numeric-id": idItem[1:]})
-
-        PARAMS = {
-            "action": "wbcreateclaim",
-            "format": "json",
-            "entity": parent,
-            "snaktype": "value",
-            "bot": "1",
-            "property": idProp,
-            "value": claim_value,
-            "token": "__AUTO__",
-        }
-
-        try:
-            DATA = self.repo.post(PARAMS)
-            assert "claim" in DATA
-            logging.info("---claim added")
-        except Exception as e:
-            raise Exception("Unknown error adding claim", e)
+    def __repr__(self) -> str:
+        return "<Lexeme '{}'>".format(self["id"])
 
 
 def get_or_create_lexeme(repo, lemma: str, lang: Language, catLex: str) -> Lexeme:
