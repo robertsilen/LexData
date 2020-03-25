@@ -212,11 +212,25 @@ class Claim(dict):
     def __repr__(self) -> str:
         return "<Claim '{}'>".format(repr(self.value))
 
+
+class Entity(dict):
+    @property
+    def claims(self) -> Dict[str, List[Claim]]:
+        """
+        All the claims of the Entity
+
+        :rtype: Dict[str, List[Claim]]
+        """
+        if self.get("claims", {}) != []:
+            return {k: [Claim(c) for c in v] for k, v in self.get("claims", {}).items()}
+        else:
+            return {}
+
     def __str__(self) -> str:
         return super().__repr__()
 
 
-class Form(dict):
+class Form(Entity):
     """Wrapper around a dict to represent a From"""
 
     def __init__(self, form: Dict):
@@ -232,23 +246,11 @@ class Form(dict):
         """
         return list(self["representations"].values())[0]["value"]
 
-    @property
-    def claims(self) -> Dict[str, List[Claim]]:
-        """
-        All the claims of the Form
-
-        :rtype: Dict[str, List[Claim]]
-        """
-        return {k: [Claim(c) for c in v] for k, v in self["claims"].items()}
-
     def __repr__(self) -> str:
         return "<Form '{}'>".format(self.form)
 
-    def __str__(self) -> str:
-        return super().__repr__()
 
-
-class Sense(dict):
+class Sense(Entity):
     """Wrapper around a dict to represent a Sense"""
 
     def __init__(self, form: Dict):
@@ -271,26 +273,11 @@ class Sense(dict):
                 lang = list(self["glosses"].keys())[0]
         return self["glosses"][lang]["value"]
 
-    @property
-    def claims(self) -> Dict[str, List[Claim]]:
-        """
-        All the claims of the Sense
-
-        :rtype: Dict[str, List[Claim]]
-        """
-        if self["claims"]:
-            return {k: [Claim(c) for c in v] for k, v in self["claims"].items()}
-        else:
-            return {}
-
     def __repr__(self) -> str:
         return "<Sense '{}'>".format(self.glosse())
 
-    def __str__(self) -> str:
-        return super().__repr__()
 
-
-class Lexeme(dict):
+class Lexeme(Entity):
     """Wrapper around a dict to represent a Lexeme"""
 
     def __init__(self, repo: WikidataSession, idLex: str):
@@ -330,15 +317,6 @@ class Lexeme(dict):
         :rtype: str
         """
         return list(self["lemmas"].values())[0]["language"]
-
-    @property
-    def claims(self) -> Dict[str, List[Claim]]:
-        """
-        All the claims of the lexeme
-
-        :rtype: Dict[str, List[Claim]]
-        """
-        return {k: [Claim(c) for c in v] for k, v in super().get("claims", {}).items()}
 
     @property
     def forms(self) -> List[Form]:
