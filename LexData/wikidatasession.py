@@ -1,3 +1,4 @@
+import time
 from typing import Any, Dict, Optional
 
 import requests
@@ -12,8 +13,9 @@ class WikidataSession:
 
     """
 
-    URL = "https://www.wikidata.org/w/api.php"
-    assertUser = None
+    URL: str = "https://www.wikidata.org/w/api.php"
+    assertUser: Optional[str] = None
+    maxlag: int = 5
 
     def __init__(
         self,
@@ -21,7 +23,7 @@ class WikidataSession:
         password: Optional[str] = None,
         token: Optional[str] = None,
         auth: Optional[str] = None,
-        user_agent=user_agent,
+        user_agent: str = user_agent,
     ):
         """
         Create a wikidata session by logging in and getting the token
@@ -32,7 +34,11 @@ class WikidataSession:
         self.headers = {"User-Agent": user_agent}
         self.S = requests.Session()
         if username is not None and password is not None:
+            # Since logins don't put load on the servers
+            # we set maxlag higher for these requests.
+            self.maxlag = 30
             self.login()
+            self.maxlag = 5
         if token is not None:
             self.CSRF_TOKEN = token
         # After logging in enable 'assertUser'-feature of the Mediawiki-API to
@@ -79,6 +85,7 @@ class WikidataSession:
             data["token"] = self.CSRF_TOKEN
         if "assertuser" not in data and self.assertUser is not None:
             data["assertuser"] = self.assertUser
+        data["maxlag"] = str(self.maxlag)
         R = self.S.post(self.URL, data=data, headers=self.headers, auth=self.auth)
         if R.status_code != 200:
             raise Exception(
@@ -86,7 +93,11 @@ class WikidataSession:
             )
         DATA = R.json()
         if "error" in DATA:
-            raise PermissionError("API returned error: " + str(DATA["error"]))
+            if DATA["error"]["code"] == "maxlag":
+                time.sleep(float(R.headers.get("retry-after", 5)))
+                return self.post(data)
+            else:
+                raise PermissionError("API returned error: " + str(DATA["error"]))
         return DATA
 
     def get(self, data: Dict[str, str]) -> Any:
@@ -99,8 +110,15 @@ class WikidataSession:
 
         """
         R = self.S.get(self.URL, params=data, headers=self.headers)
-        if R.status_code != 200:
-            raise Exception(
-                "GET was unsuccessfull ({}): {}".format(R.status_code, R.text)
-            )
-        return R.json()
+        DATA = R.json()
+        if R.status_code != 200 or "error" in DATA:
+            # We do not set maxlag for GET requests – so this error can only
+            # occur if the users sets maxlag in the request data object
+            if DATA["error"]["code"] == "maxlag":
+                time.sleep(float(R.headers.get("retry-after", 5)))
+                return self.get(data)
+            else:
+                raise Exception(
+                    "GET was unsuccessfull ({}): {}".format(R.status_code, R.text)
+                )
+        return DATA
