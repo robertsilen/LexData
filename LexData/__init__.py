@@ -1,6 +1,7 @@
 # -*-coding:utf-8-*
 import json
 import logging
+from typing import List
 
 from .claim import Claim
 from .form import Form
@@ -25,8 +26,34 @@ def get_or_create_lexeme(repo, lemma: str, lang: Language, catLex: str) -> Lexem
     :rtype: Lexeme
 
     """
+    lexemes = search_lexemes(repo, lemma, lang, catLex)
+    if len(lexemes) == 1:
+        return lexemes[0]
+    elif len(lexemes) > 1:
+        logging.warning("Multiple lexemes found, using first one.")
+        return lexemes[0]
+    else:
+        return create_lexeme(repo, lemma, lang, catLex)
 
-    # the language we search in actually doesn't really matter
+
+def search_lexemes(
+    repo: WikidataSession, lemma: str, lang: Language, catLex: str
+) -> List[Lexeme]:
+    """
+    Search for a lexeme by it's label, language and lexical category.
+
+    :param repo: Wikidata Session
+    :type  repo: WikidataSession
+    :param lemma: the lemma of the lexeme
+    :type  lemma: str
+    :param lang: language of the lexeme
+    :type  lang: Language
+    :param catLex: lexical Category of the lexeme
+    :type  catLex: str
+    :returns: List of Lexemes with the specified properties
+    :rtype: List[Lexeme]
+    """
+    # the language we specify in search is currently not used by the search
     # set it nevertheless, except if it is a Language without ISO code
     if lang.short[:3] == "mis":
         searchlang = "en"
@@ -39,6 +66,7 @@ def get_or_create_lexeme(repo, lemma: str, lang: Language, catLex: str) -> Lexem
         "type": "lexeme",
         "search": lemma,
         "format": "json",
+        "limit": 10,
     }
 
     DATA = repo.get(PARAMS)
@@ -46,20 +74,26 @@ def get_or_create_lexeme(repo, lemma: str, lang: Language, catLex: str) -> Lexem
     if "error" in DATA:
         raise Exception(DATA["error"])
 
+    # Iterate over all results and check for matches. Do not rely on
+    # match-results, since they can differ for smaller languages – use them
+    # however to avoid unnecessary queries.
+    lexemes = []
     for item in DATA["search"]:
-        # if the lexeme exists
         if item["label"] == lemma:
+            if "language" in item["match"]:
+                if item["match"]["language"] != lang.short and item["match"] != "und":
+                    continue
             idLex = item["id"]
             lexeme = Lexeme(repo, idLex)
             if lexeme["language"] == lang.qid and lexeme["lexicalCategory"] == catLex:
                 logging.info("--Found lexeme, id = %s", idLex)
-                return lexeme
-
-    # Not found, create the lexeme
-    return create_lexeme(repo, lemma, lang, catLex)
+                lexemes.append(lexeme)
+    return lexemes
 
 
-def create_lexeme(repo, lemma: str, lang: Language, catLex: str, claims=None) -> Lexeme:
+def create_lexeme(
+    repo: WikidataSession, lemma: str, lang: Language, catLex: str, claims=None
+) -> Lexeme:
     """Creates a lexeme
 
     :param repo: Wikidata Session
