@@ -1,10 +1,8 @@
-"""
-This module simply contains a few common Languages with their language-codes
-and QIDs for easier use.
-"""
-from LexData import Language
+import logging
 
-# feel free to add more languages
-en = Language("en", "Q1860")
-de = Language("de", "Q188")
-fr = Language("fr", "Q150")
+from .language import *
+
+logging.warning(
+    "LexData.languages has been renamed to LexData.language. "
+    + "LexData.languages will be removed in future versions."
+)
