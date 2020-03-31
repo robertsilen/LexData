@@ -593,19 +593,15 @@ def create_lexeme(repo, lemma: str, lang: Language, catLex: str, claims=None) ->
 
     return lexeme
 
-    # Update given Lexeme with given JSON
-    def update_lexeme_by_json(repo,idLex,data_lex):
-    # Send a post to edit a lexeme
+
+def overwrite_lexeme_by_json(repo, idLex: int, data_lex: str):
+    """Overwrite the lexeme with a new version supplied as json-string"""
     PARAMS = {
         "action": "wbeditentity",
         "format": "json",
         "bot": "1",
-        "id": idLex, 
+        "id": idLex,
         "token": "__AUTO__",
         "data": data_lex,
     }
-
-    DATA = repo.post(PARAMS)
-
-    return idLex
-
+    repo.post(PARAMS)
