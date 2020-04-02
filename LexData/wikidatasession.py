@@ -44,7 +44,7 @@ class WikidataSession:
         # After logging in enable 'assertUser'-feature of the Mediawiki-API to
         # make sure to never edit accidentally as IP
         if username is not None:
-            self.assertUser = username
+            self.assertUser = username.split("@")[0]
 
     def login(self):
         # Ask for a token
