@@ -176,3 +176,26 @@ class Lexeme(Entity):
 
     def __repr__(self) -> str:
         return "<Lexeme '{}'>".format(self["id"])
+
+    def update_from_json(self, data: str, overwrite=False):
+        """Update the lexeme from an json-string.
+
+        :param data: Data update: See the API documentation about the format.
+        :param overwrite: If set the whole entity is replaced by the supplied data
+        """
+        PARAMS = {
+            "action": "wbeditentity",
+            "format": "json",
+            "bot": "1",
+            "id": self.get("id"),
+            "token": "__AUTO__",
+            "data": data,
+        }
+        if overwrite:
+            PARAMS["clear"] = "true"
+        DATA = self.repo.post(PARAMS)
+        if DATA.get("success") != 200:
+            raise ValueError(DATA)
+        # Due to limitations of the API, the returned data cannot be used to
+        # update the instance. Therefore reload the lexeme.
+        self.getLex(self["id"])

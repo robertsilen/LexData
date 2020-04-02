@@ -142,16 +142,3 @@ def create_lexeme(
         lexeme.createClaims(claims)
 
     return lexeme
-
-
-def overwrite_lexeme_by_json(repo, idLex: int, data_lex: str):
-    """Overwrite the lexeme with a new version supplied as json-string"""
-    PARAMS = {
-        "action": "wbeditentity",
-        "format": "json",
-        "bot": "1",
-        "id": idLex,
-        "token": "__AUTO__",
-        "data": data_lex,
-    }
-    repo.post(PARAMS)
