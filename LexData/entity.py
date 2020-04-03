@@ -54,14 +54,11 @@ class Entity(dict):
         }
 
         DATA = repo.post(PARAMS)
-        try:
-            assert "claim" in DATA
-            addedclaim = DATA["claim"]
-            logging.info("---claim added")
-        except Exception as e:
-            raise Exception("Unknown error adding claim", e)
+        assert "claim" in DATA
+        addedclaim = DATA["claim"]
+        logging.info("Claim added")
 
-        # Add the created claim to the entity
+        # Add the created claim to the local entity instance
         if self.get("claims", []) == []:
             self["claims"] = {idProp: addedclaim}
         elif idProp in self.claims:

@@ -1,3 +1,4 @@
+import logging
 import time
 from typing import Any, Dict, Optional
 
@@ -9,8 +10,6 @@ from .version import user_agent
 class WikidataSession:
     """Wikidata network and authentication session. Needed for everything this
     framework does.
-
-
     """
 
     URL: str = "https://www.wikidata.org/w/api.php"
@@ -26,7 +25,7 @@ class WikidataSession:
         user_agent: str = user_agent,
     ):
         """
-        Create a wikidata session by logging in and getting the token
+        Create a wikidata session by login in and getting the token
         """
         self.username = username
         self.password = password
@@ -41,9 +40,10 @@ class WikidataSession:
             self.maxlag = 5
         if token is not None:
             self.CSRF_TOKEN = token
-        # After logging in enable 'assertUser'-feature of the Mediawiki-API to
+        # After login enable 'assertUser'-feature of the Mediawiki-API to
         # make sure to never edit accidentally as IP
         if username is not None:
+            # truncate bot name if a "bot password" is used
             self.assertUser = username.split("@")[0]
 
     def login(self):
@@ -66,10 +66,12 @@ class WikidataSession:
             "lgtoken": LOGIN_TOKEN,
         }
         self.post(PARAMS_2)
+        logging.info("Logged in")
 
         PARAMS_3 = {"action": "query", "meta": "tokens", "format": "json"}
         DATA = self.get(PARAMS_3)
         self.CSRF_TOKEN = DATA["query"]["tokens"]["csrftoken"]
+        logging.info("Got CSRF token: %s", self.CSRF_TOKEN)
 
     def post(self, data: Dict[str, str]) -> Any:
         """Send data to wikidata by POST request. The CSRF token is automatically
@@ -94,10 +96,13 @@ class WikidataSession:
         DATA = R.json()
         if "error" in DATA:
             if DATA["error"]["code"] == "maxlag":
-                time.sleep(float(R.headers.get("retry-after", 5)))
+                sleepfor = float(R.headers.get("retry-after", 5))
+                logging.info("Maxlag hit, waiting for %.1f seconds", sleepfor)
+                time.sleep(sleepfor)
                 return self.post(data)
             else:
                 raise PermissionError("API returned error: " + str(DATA["error"]))
+        logging.debug("Post request succeed")
         return DATA
 
     def get(self, data: Dict[str, str]) -> Any:
@@ -115,10 +120,13 @@ class WikidataSession:
             # We do not set maxlag for GET requests – so this error can only
             # occur if the users sets maxlag in the request data object
             if DATA["error"]["code"] == "maxlag":
-                time.sleep(float(R.headers.get("retry-after", 5)))
+                sleepfor = float(R.headers.get("retry-after", 5))
+                logging.info("Maxlag hit, waiting for %.1f seconds", sleepfor)
+                time.sleep(sleepfor)
                 return self.get(data)
             else:
                 raise Exception(
                     "GET was unsuccessfull ({}): {}".format(R.status_code, R.text)
                 )
+        logging.debug("Get request succeed")
         return DATA

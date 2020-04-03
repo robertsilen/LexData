@@ -86,7 +86,7 @@ def search_lexemes(
             idLex = item["id"]
             lexeme = Lexeme(repo, idLex)
             if lexeme["language"] == lang.qid and lexeme["lexicalCategory"] == catLex:
-                logging.info("--Found lexeme, id = %s", idLex)
+                logging.info("Found lexeme: %s", idLex)
                 lexemes.append(lexeme)
     return lexemes
 
@@ -135,7 +135,7 @@ def create_lexeme(
     # Get the id of the new lexeme
     idLex = DATA["entity"]["id"]
 
-    logging.info("--Created lexeme : idLex = %s", idLex)
+    logging.info("Created lexeme: %s", idLex)
     lexeme = Lexeme(repo, idLex)
 
     if claims:

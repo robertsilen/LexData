@@ -1,6 +1,10 @@
 #!/usr/bin/python3
+import logging
+
 import LexData
 from LexData.languages import en
+
+logging.basicConfig(level=logging.INFO)
 
 repo = LexData.WikidataSession("MichaelSchoenitzer", "foobar")
 

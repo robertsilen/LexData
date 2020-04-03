@@ -96,7 +96,7 @@ class Lexeme(Entity):
         DATA = self.repo.post(PARAMS)
         addedSense = Sense(DATA["sense"])
         idSense = DATA["sense"]["id"]
-        logging.info("---Created sense: idsense = %s", idSense)
+        logging.info("Created sense: %s", idSense)
 
         # Add the claims
         if claims:
@@ -155,7 +155,7 @@ class Lexeme(Entity):
         DATA = self.repo.post(PARAMS)
         addedForm = Form(DATA["form"])
         idForm = DATA["form"]["id"]
-        logging.info("---Created form: idForm = %s", idForm)
+        logging.info("Created form: %s", idForm)
 
         # Add the claims
         if claims:
@@ -196,6 +196,7 @@ class Lexeme(Entity):
         DATA = self.repo.post(PARAMS)
         if DATA.get("success") != 200:
             raise ValueError(DATA)
+        logging.info("Updated from json data")
         # Due to limitations of the API, the returned data cannot be used to
         # update the instance. Therefore reload the lexeme.
         self.getLex(self["id"])
