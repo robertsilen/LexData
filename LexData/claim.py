@@ -25,7 +25,7 @@ class Claim(dict):
 
         :rtype: str
         """
-        return self["mainsnak"]["datavalue"]["type"]
+        return self["mainsnak"]["datatype"]
 
     @property_decorator
     def property(self) -> str:
