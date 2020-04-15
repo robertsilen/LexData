@@ -42,11 +42,12 @@ class Entity(dict):
                        The first supports all datatypes, whereas the later
                        currently only supports datatypes of kind entity
         """
-        if type(claims) is list:
+        if isinstance(claims, list):
             self.__setClaims__(claims)
-        elif type(claims) is dict:
+        elif isinstance(claims, dict):
             self.__createClaims__(claims)
-        # TODO
+        else:
+            raise TypeError("Invalid argument type:", type(claims))
 
     def __setClaims__(self, claims: List[Claim]):
         """

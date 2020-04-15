@@ -16,7 +16,7 @@ class Claim(dict):
         value: Optional[Any] = None,
     ):
         super().__init__()
-        if type(claim) is dict and not propertyId and not value:
+        if isinstance(claim, dict) and not propertyId and not value:
             self.update(claim)
         elif claim is None and propertyId and value:
             self["mainsnak"] = buildSnak(propertyId, value)

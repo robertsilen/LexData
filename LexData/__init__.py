@@ -11,7 +11,9 @@ from .sense import Sense
 from .wikidatasession import WikidataSession
 
 
-def get_or_create_lexeme(repo, lemma: str, lang: Language, catLex: str) -> Lexeme:
+def get_or_create_lexeme(
+    repo: WikidataSession, lemma: str, lang: Language, catLex: str
+) -> Lexeme:
     """Search for a lexeme in wikidata if not found, create it
 
     :param repo: Wikidata Session

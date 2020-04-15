@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Dict, List, Optional
 
+from .claim import Claim
 from .entity import Entity
 from .form import Form
 from .language import Language
@@ -68,7 +69,7 @@ class Lexeme(Entity):
         return [Sense(self.repo, s) for s in super().get("senses", [])]
 
     def createSense(
-        self, glosses: Dict[str, str], claims: Optional[Dict[str, List[str]]] = None
+        self, glosses: Dict[str, str], claims: Optional[List[Claim]] = None
     ) -> str:
         """Create a sense for the lexeme
 
@@ -110,8 +111,8 @@ class Lexeme(Entity):
         self,
         form: str,
         infosGram: List[str],
-        language: Language = None,
-        claims: Optional[Dict[str, List[str]]] = None,
+        language: Optional[Language] = None,
+        claims: Optional[List[Claim]] = None,
     ) -> str:
         """Create a form for the lexeme
 
@@ -189,7 +190,7 @@ class Lexeme(Entity):
         :param data: Data update: See the API documentation about the format.
         :param overwrite: If set the whole entity is replaced by the supplied data
         """
-        PARAMS = {
+        PARAMS: Dict[str, str] = {
             "action": "wbeditentity",
             "format": "json",
             "bot": "1",

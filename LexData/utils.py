@@ -1,6 +1,7 @@
 import functools
 import json
 from datetime import datetime
+from typing import Any, Dict
 
 from .wikidatasession import WikidataSession
 
@@ -87,7 +88,7 @@ def buildDataValue(datatype: str, value):
             return {"value": value, "type": "time"}
         if type(value) == datetime:
             cleanedDateTime = value.replace(hour=0, minute=0, second=0, microsecond=0)
-            valueObj = {
+            valueObj: Dict[str, Any] = {
                 "time": "+" + cleanedDateTime.isoformat() + "Z",
                 "timezone": 0,
                 "before": 0,
