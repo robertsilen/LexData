@@ -20,7 +20,8 @@ def repo(credentials):
 
 
 def test_auth(credentials):
-    wrongpassword = LexData.WikidataSession("Username", "Password")
+    with pytest.raises(Exception):
+        assert LexData.WikidataSession("Username", "Password")
     anon = LexData.WikidataSession()
     LexData.Lexeme(anon, "L2")
     # anon.maxlag = 1

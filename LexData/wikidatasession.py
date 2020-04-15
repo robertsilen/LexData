@@ -65,8 +65,10 @@ class WikidataSession:
             "format": "json",
             "lgtoken": LOGIN_TOKEN,
         }
-        self.post(PARAMS_2)
-        logging.info("Logged in")
+        DATA = self.post(PARAMS_2)
+        if DATA.get("login", []).get("result") != "Success":
+            raise PermissionError("Login failed", DATA["login"]["reason"])
+        logging.info("Log in succeeded")
 
         PARAMS_3 = {"action": "query", "meta": "tokens", "format": "json"}
         DATA = self.get(PARAMS_3)
