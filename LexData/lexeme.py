@@ -13,8 +13,7 @@ class Lexeme(Entity):
     """Wrapper around a dict to represent a Lexeme"""
 
     def __init__(self, repo: WikidataSession, idLex: str):
-        super().__init__()
-        self.repo = repo
+        super().__init__(repo)
         self.getLex(idLex)
 
     def getLex(self, idLex: str):
@@ -57,7 +56,7 @@ class Lexeme(Entity):
 
         :rtype: List[Form]
         """
-        return [Form(f) for f in super().get("forms", [])]
+        return [Form(self.repo, f) for f in super().get("forms", [])]
 
     @property
     def senses(self) -> List[Sense]:
@@ -66,7 +65,7 @@ class Lexeme(Entity):
 
         :rtype: List[Sense]
         """
-        return [Sense(s) for s in super().get("senses", [])]
+        return [Sense(self.repo, s) for s in super().get("senses", [])]
 
     def createSense(
         self, glosses: Dict[str, str], claims: Optional[Dict[str, List[str]]] = None
@@ -88,19 +87,19 @@ class Lexeme(Entity):
         PARAMS = {
             "action": "wbladdsense",
             "format": "json",
-            "lexemeId": self["id"],
+            "lexemeId": self.id,
             "token": "__AUTO__",
             "bot": "1",
             "data": json.dumps(data_sense),
         }
         DATA = self.repo.post(PARAMS)
-        addedSense = Sense(DATA["sense"])
+        addedSense = Sense(self.repo, DATA["sense"])
         idSense = DATA["sense"]["id"]
         logging.info("Created sense: %s", idSense)
 
         # Add the claims
         if claims:
-            addedSense.__setClaims__(self.repo, claims)
+            addedSense.addClaims(claims)
 
         # Add the created form to the local lexeme
         self["senses"].append(addedSense)
@@ -147,19 +146,19 @@ class Lexeme(Entity):
         PARAMS = {
             "action": "wbladdform",
             "format": "json",
-            "lexemeId": self["id"],
+            "lexemeId": self.id,
             "token": "__AUTO__",
             "bot": "1",
             "data": data_form,
         }
         DATA = self.repo.post(PARAMS)
-        addedForm = Form(DATA["form"])
+        addedForm = Form(self.repo, DATA["form"])
         idForm = DATA["form"]["id"]
         logging.info("Created form: %s", idForm)
 
         # Add the claims
         if claims:
-            addedForm.__setClaims__(self.repo, claims)
+            addedForm.addClaims(claims)
 
         # Add the created form to the local lexeme
         self["forms"].append(addedForm)
@@ -182,7 +181,7 @@ class Lexeme(Entity):
         self.__createClaims__(claims)
 
     def __repr__(self) -> str:
-        return "<Lexeme '{}'>".format(self["id"])
+        return "<Lexeme '{}'>".format(self.id)
 
     def update_from_json(self, data: str, overwrite=False):
         """Update the lexeme from an json-string.
@@ -194,7 +193,7 @@ class Lexeme(Entity):
             "action": "wbeditentity",
             "format": "json",
             "bot": "1",
-            "id": self.get("id"),
+            "id": self.id,
             "token": "__AUTO__",
             "data": data,
         }
@@ -206,4 +205,4 @@ class Lexeme(Entity):
         logging.info("Updated from json data")
         # Due to limitations of the API, the returned data cannot be used to
         # update the instance. Therefore reload the lexeme.
-        self.getLex(self["id"])
+        self.getLex(self.id)

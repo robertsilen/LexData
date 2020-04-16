@@ -1,13 +1,14 @@
 from typing import Dict
 
 from .entity import Entity
+from .wikidatasession import WikidataSession
 
 
 class Sense(Entity):
     """Wrapper around a dict to represent a Sense"""
 
-    def __init__(self, form: Dict):
-        super().__init__()
+    def __init__(self, repo: WikidataSession, form: Dict):
+        super().__init__(repo)
         self.update(form)
 
     def glosse(self, lang: str = "en") -> str:
