@@ -1,4 +1,6 @@
-from typing import Any, Dict, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
+
+from .utils import buildSnak
 
 
 class Claim(dict):
@@ -7,9 +9,24 @@ class Claim(dict):
     # Hack needed to define a property called property
     property_decorator = property
 
-    def __init__(self, claim: Dict[str, Any]):
+    def __init__(
+        self,
+        claim: Optional[Dict[str, Any]] = None,
+        propertyId: Optional[str] = None,
+        value: Optional[Any] = None,
+    ):
         super().__init__()
-        self.update(claim)
+        if type(claim) is dict and not propertyId and not value:
+            self.update(claim)
+        elif claim is None and propertyId and value:
+            self["mainsnak"] = buildSnak(propertyId, value)
+            self["rank"] = "normal"
+        else:
+            raise TypeError(
+                "Claim() received an invalid combination of arguments expected one of:"
+                + " * (dict claimObject)"
+                + " * (str propertyId, value)"
+            )
 
     @property_decorator
     def value(self) -> Dict[str, Any]:
@@ -91,4 +108,7 @@ class Claim(dict):
         raise NotImplementedError
 
     def __repr__(self) -> str:
-        return "<Claim '{}'>".format(repr(self.value))
+        if "id" in self:
+            return "<Claim '{}'>".format(repr(self.value))
+        else:
+            return "<Detached Claim '{}'>".format(repr(self.value))

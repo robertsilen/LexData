@@ -1,12 +1,17 @@
 import json
 import logging
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from .claim import Claim
 from .wikidatasession import WikidataSession
 
 
 class Entity(dict):
+    """
+    Base class for all types of entities – currently: Lexeme, Form, Sense.
+    Not yet implemented: Item, Property.
+    """
+
     @property
     def claims(self) -> Dict[str, List[Claim]]:
         """
@@ -19,29 +24,68 @@ class Entity(dict):
         else:
             return {}
 
-    # TODO: make compatible with type Claim
-    def __setClaims__(self, repo: WikidataSession, claims: Dict[str, List[str]]):
+    def addClaims(
+        self, repo: WikidataSession, claims: Union[List[Claim], Dict[str, List[str]]]
+    ):
         """
-        Add claims to the entity (Lexeme, Form or Sense)
+        Add claims to the entity.
+
+        :param repo: Wikidata Session to use
+        :param claims: The claims to be added to the entity
+                       There are two possibilities for this:
+                       - A list of Objects of type Claim
+                         Example: [Claim(propertyId="P31", value="Q1")]
+                       - A dictionary with the property id as key and lists, of
+                         string formated entity ids, as values.
+                         Example: {"P31": ["Q1", "Q2"]}
+                       The first supports all datatypes, whereas the later
+                       currently only supports datatypes of kind entity
+        """
+        if type(claims) is list:
+            self.__setClaims__(repo, claims)
+        elif type(claims) is dict:
+            self.__createClaims__(repo, claims)
+
+    def __setClaims__(self, repo: WikidataSession, claims: List[Claim]):
+        """
+        Add prebuild claims to the entity
+
+        :param repo: Wikidata Session to use
+        :param claims: The list of claims to be added
+        """
+        for claim in claims:
+            pid = claim.property
+            self.__setClaim__(repo, pid, claim)
+
+    def __createClaims__(self, repo: WikidataSession, claims: Dict[str, List[str]]):
+        """
+        Create and add new claims to the entity.
+
+        Only properties of some entity type are implemented:
+        Item, Property, Lexeme, Form and Sense
 
         :param repo: Wikidata Session to use
         :param claims: The set of claims to be added
         """
         for cle, values in claims.items():
             for value in values:
-                self.__setClaim__(repo, cle, value)
+                self.__setEntityClaim__(repo, cle, value)
 
-    def __setClaim__(self, repo: WikidataSession, idProp: str, idItem: str):
+    def __setEntityClaim__(self, repo: WikidataSession, idProp: str, idStr: str):
         """
-        Add a claim to the entity
+        Add a claim of an entity-type to the entity.
+
+        Supported types are Lexeme, Form, Sense, Item, Property.
 
         :param repo: Wikidata Session to use
-        :param idProp: id of the property
-        :param idItem: id of the Item
+        :param idProp: id of the property (example: "P31")
+        :param idItem: id of the entity (example: "Q1")
         """
+        entityId = int(idStr[1:])
+        claim_value = json.dumps({"entity-type": "item", "numeric-id": entityId})
+        self.__setClaim__(repo, idProp, claim_value)
 
-        claim_value = json.dumps({"entity-type": "item", "numeric-id": idItem[1:]})
-
+    def __setClaim__(self, repo: WikidataSession, idProp: str, claim_value):
         PARAMS = {
             "action": "wbcreateclaim",
             "format": "json",
