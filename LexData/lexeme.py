@@ -169,10 +169,17 @@ class Lexeme(Entity):
     def createClaims(self, claims: Dict[str, List[str]]):
         """Add claims to the Lexeme
 
+        createClaim() is deprecated and might be removed in future versions.
+        Use addClaims() instead.
+
         :param claims: The set of claims to be added
 
         """
-        self.__setClaims__(self.repo, claims)
+        logging.warning(
+            "createClaim() is deprecated and might be removed in future versions."
+            + " Use addClaims() instead"
+        )
+        self.__createClaims__(claims)
 
     def __repr__(self) -> str:
         return "<Lexeme '{}'>".format(self["id"])

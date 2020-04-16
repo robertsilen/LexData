@@ -82,6 +82,7 @@ def test_writes(repo):
     L123 = LexData.Lexeme(repo, "L123")
 
     L123.createClaims({"P369": ["Q1"]})
+    L123.addClaims({"P369": ["Q1"]})
 
     fid = L123.createForm("test", ["Q860"])
 
