@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -17,6 +18,14 @@ def credentials():
 def repo(credentials):
     username, password = credentials
     return LexData.WikidataSession(username, password)
+
+
+@pytest.fixture
+def repoTestWikidata():
+    test = LexData.WikidataSession()
+    test.URL = "https://test.wikidata.org/w/api.php"
+    test.CSRF_TOKEN = "+\\"
+    return test
 
 
 def test_auth(credentials):
@@ -77,18 +86,17 @@ def test_form(repo):
         assert isinstance(form.claims, dict)
 
 
-def test_writes(repo):
-    # L123 is a sanbox lexeme, we can edit it
-    L123 = LexData.Lexeme(repo, "L123")
+def test_writes(repoTestWikidata):
+    L123 = LexData.Lexeme(repoTestWikidata, "L123")
 
-    L123.createClaims({"P369": ["Q1"]})
-    L123.addClaims({"P369": ["Q1"]})
+    L123.createClaims({"P7": ["Q100"]})
+    L123.addClaims({"P7": ["Q100"]})
 
-    fid = L123.createForm("test", ["Q860"])
+    L123.createForm("test", ["Q100"])
 
     L123.createSense({"de": "testtest", "en": "testtest"})
     L123.createSense({"de": "more tests", "en": "more tests"}, claims={})
-    L123.createSense({"en": "even more tests"}, claims={"P369": ["Q1"]})
+    L123.createSense({"en": "even more tests"}, claims={"P7": ["Q100"]})
 
 
 def test_search(repo):
@@ -98,3 +106,24 @@ def test_search(repo):
 
     result = LexData.get_or_create_lexeme(repo, "first", LexData.language.en, "Q1084")
     assert result["id"] == "L2"
+
+
+def test_detatchedClaim(repo):
+    LexData.Claim(propertyId="P369", value="Q1")
+    LexData.Claim(propertyId="P856", value="http://example.com/")
+    LexData.Claim(propertyId="P2534", value="\frac{1}{2}")
+    quantity = LexData.Claim(propertyId="P2021", value=6)
+    assert quantity.pure_value == 6
+    date = LexData.Claim(propertyId="P580", value=datetime.now())
+    assert type(date.pure_value) is str
+    with pytest.raises(TypeError):
+        LexData.Claim(propertyId="P856", value=1)
+        LexData.Claim(propertyId="P2021", value="foo")
+        LexData.Claim(propertyId="P580", value=1)
+        LexData.Claim(propertyId="P580", value="foo")
+    with pytest.raises(Exception):
+        LexData.Claim(propertyId="P0", value="foo")
+
+
+def test_createLexeme(repoTestWikidata):
+    LexData.create_lexeme(repoTestWikidata, "foobar", LexData.language.en, "Q100")
