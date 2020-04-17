@@ -61,4 +61,6 @@ html_theme_options = {
     "github_type": "star",
     "github_count": False,
     "description": "Edit Wikidatas Lexemes",
+    "page_width": "60em",
+    "fixed_sidebar": True,
 }
