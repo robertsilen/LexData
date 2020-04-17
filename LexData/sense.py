@@ -10,7 +10,7 @@ class Sense(Entity):
         super().__init__()
         self.update(form)
 
-    def glosse(self, lang="en") -> str:
+    def glosse(self, lang: str = "en") -> str:
         """
         The gloss of the text in the specified language is available, otherwise
         in englisch, and if that's not set too in an arbitrary set language

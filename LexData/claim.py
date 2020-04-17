@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict, Tuple, Union
 
 
 class Claim(dict):
@@ -7,19 +7,19 @@ class Claim(dict):
     # Hack needed to define a property called property
     property_decorator = property
 
-    def __init__(self, claim: Dict):
+    def __init__(self, claim: Dict[str, Any]):
         super().__init__()
         self.update(claim)
 
     @property_decorator
-    def value(self):
+    def value(self) -> Dict[str, Any]:
         """
         Return the value of the claim. The type depends on the data type.
         """
         return self["mainsnak"]["datavalue"]["value"]
 
     @property_decorator
-    def type(self):
+    def type(self) -> str:
         """
         Return the data type of the claim.
 
@@ -28,7 +28,7 @@ class Claim(dict):
         return self["mainsnak"]["datavalue"]["type"]
 
     @property_decorator
-    def property(self):
+    def property(self) -> str:
         """
         Return the property of the claim.
 
@@ -37,7 +37,7 @@ class Claim(dict):
         return self["mainsnak"]["property"]
 
     @property_decorator
-    def rank(self):
+    def rank(self) -> str:
         """
         Return the rank of the claim.
 
@@ -46,7 +46,7 @@ class Claim(dict):
         return self["rank"]
 
     @property_decorator
-    def numeric_rank(self):
+    def numeric_rank(self) -> int:
         """
         Return the rank of the claim as integer.
 
@@ -61,7 +61,7 @@ class Claim(dict):
         raise NotImplementedError("Unknown or invalid rank {}".format(self.rank))
 
     @property_decorator
-    def pure_value(self):
+    def pure_value(self) -> Union[str, int, float, Tuple[float, float]]:
         """
         Return just the 'pure' value, what this is depends on the type of the value:
         - wikibase-entity: the id, including 'L/Q/P'-prefix

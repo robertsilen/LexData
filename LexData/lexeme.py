@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from .entity import Entity
 from .form import Form
@@ -68,7 +68,9 @@ class Lexeme(Entity):
         """
         return [Sense(s) for s in super().get("senses", [])]
 
-    def createSense(self, glosses: Dict[str, str], claims=None) -> str:
+    def createSense(
+        self, glosses: Dict[str, str], claims: Optional[Dict[str, List[str]]] = None
+    ) -> str:
         """Create a sense for the lexeme
 
         :param glosses: glosses for the sense
@@ -106,7 +108,11 @@ class Lexeme(Entity):
         return idSense
 
     def createForm(
-        self, form: str, infosGram: List[str], language: Language = None, claims=None
+        self,
+        form: str,
+        infosGram: List[str],
+        language: Language = None,
+        claims: Optional[Dict[str, List[str]]] = None,
     ) -> str:
         """Create a form for the lexeme
 
@@ -160,7 +166,7 @@ class Lexeme(Entity):
 
         return idForm
 
-    def createClaims(self, claims):
+    def createClaims(self, claims: Dict[str, List[str]]):
         """Add claims to the Lexeme
 
         :param claims: The set of claims to be added

@@ -66,7 +66,7 @@ def search_lexemes(
         "type": "lexeme",
         "search": lemma,
         "format": "json",
-        "limit": 10,
+        "limit": "10",
     }
 
     DATA = repo.get(PARAMS)
