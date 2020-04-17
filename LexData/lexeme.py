@@ -18,7 +18,7 @@ class Lexeme(Entity):
         self.getLex(idLex)
 
     def getLex(self, idLex: str):
-        """this function gets and returns the data of a lexeme for a given id
+        """This function gets and returns the data of a lexeme for a given id.
 
         :param idLex: Lexeme identifier (example: "L2")
         :type  idLex: str
@@ -35,7 +35,7 @@ class Lexeme(Entity):
     @property
     def lemma(self) -> str:
         """
-        the lemma of the lexeme as string
+        The lemma of the lexeme as string
 
         :rtype: str
         """
@@ -44,7 +44,7 @@ class Lexeme(Entity):
     @property
     def language(self) -> str:
         """
-        the language code of the lexeme as string
+        The language code of the lexeme as string
 
         :rtype: str
         """
@@ -71,13 +71,12 @@ class Lexeme(Entity):
     def createSense(
         self, glosses: Dict[str, str], claims: Optional[List[Claim]] = None
     ) -> str:
-        """Create a sense for the lexeme
+        """Create a sense for the lexeme.
 
         :param glosses: glosses for the sense
         :type  glosses: Dict[str, str]
-        :param claims: claims to add to the new form (Default value = None) -> st)
+        :param claims: claims to add to the new form
         :rtype: str
-
         """
         # Create the json with the sense's data
         data_sense: Dict[str, Dict[str, Dict[str, str]]] = {"glosses": {}}
@@ -114,7 +113,7 @@ class Lexeme(Entity):
         language: Optional[Language] = None,
         claims: Optional[List[Claim]] = None,
     ) -> str:
-        """Create a form for the lexeme
+        """Create a form for the lexeme.
 
         :param form: the new form to add
         :type  form: str
@@ -122,7 +121,7 @@ class Lexeme(Entity):
         :type  infosGram: List[str]
         :param language: the language of the form
         :type  language: Optional[Language]
-        :param claims: claims to add to the new form (Default value = None) -> st)
+        :param claims: claims to add to the new form
         :returns: The id of the form
         :rtype: str
 
@@ -167,17 +166,17 @@ class Lexeme(Entity):
         return idForm
 
     def createClaims(self, claims: Dict[str, List[str]]):
-        """Add claims to the Lexeme
+        """Add claims to the Lexeme.
 
         createClaim() is deprecated and might be removed in future versions.
-        Use addClaims() instead.
+        Use Entity.addClaims() instead.
 
         :param claims: The set of claims to be added
 
         """
         logging.warning(
             "createClaim() is deprecated and might be removed in future versions."
-            + " Use addClaims() instead"
+            + " Use Entity.addClaims() instead"
         )
         self.__createClaims__(claims)
 
@@ -186,6 +185,10 @@ class Lexeme(Entity):
 
     def update_from_json(self, data: str, overwrite=False):
         """Update the lexeme from an json-string.
+
+        This is a lower level function usable to save arbitrary modifications
+        on a lexeme. The data has to be supplied in the right format by the
+        user.
 
         :param data: Data update: See the API documentation about the format.
         :param overwrite: If set the whole entity is replaced by the supplied data

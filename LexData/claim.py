@@ -4,7 +4,19 @@ from .utils import buildSnak
 
 
 class Claim(dict):
-    """Wrapper around a dict to represent a Claim"""
+    """Wrapper around a dict to represent a Claim
+
+    There are two types of Claim objects:
+
+    * Claims that where received from an existing entity.
+    * Claims that where created by the user by Claim(propertyId, value) and
+      have not yet been uploaded to Wikidata. These are called 'Detached Claims',
+      since they don't belong to any entity.  They don't have an id nor an hash.
+      They can be added to an entity by the function Entity.addClaims().
+
+    Currently modifications on both types of claims can't be uploaded, except
+    by use of the low level API call Lexeme.update_from_json().
+    """
 
     # Hack needed to define a property called property
     property_decorator = property
@@ -47,7 +59,7 @@ class Claim(dict):
     @property_decorator
     def property(self) -> str:
         """
-        Return the property of the claim.
+        Return the id of the property of the claim.
 
         :rtype: str
         """
@@ -81,12 +93,13 @@ class Claim(dict):
     def pure_value(self) -> Union[str, int, float, Tuple[float, float]]:
         """
         Return just the 'pure' value, what this is depends on the type of the value:
-        - wikibase-entity: the id, including 'L/Q/P'-prefix
-        - string: the string
-        - manolingualtext: the text as string
-        - quantity: the amount as float
-        - time: the timestamp as string in format ISO 8601
-        - globecoordinate: tuple of latitude and longitude as floats
+
+        * wikibase-entity: the id as string, including 'L/Q/P'-prefix
+        * string: the string
+        * manolingualtext: the text as string
+        * quantity: the amount as float
+        * time: the timestamp as string in format ISO 8601
+        * globecoordinate: tuple of latitude and longitude as floats
 
         Be aware that for most types this is not the full information stored in
         the value.

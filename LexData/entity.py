@@ -32,15 +32,21 @@ class Entity(dict):
         """
         Add claims to the entity.
 
-        :param claims: The claims to be added to the entity
+        :param claims: The claims to be added to the entity.
+
                        There are two possibilities for this:
+
                        - A list of Objects of type Claim
-                         Example: [Claim(propertyId="P31", value="Q1")]
-                       - A dictionary with the property id as key and lists, of
-                         string formated entity ids, as values.
-                         Example: {"P31": ["Q1", "Q2"]}
+
+                         Example: ``[Claim(propertyId="P31", value="Q1")]``
+
+                       - A dictionary with the property id as key and lists of
+                         string formated entity ids as values.
+
+                         Example: ``{"P31": ["Q1", "Q2"]}``
+
                        The first supports all datatypes, whereas the later
-                       currently only supports datatypes of kind entity
+                       currently only supports datatypes of kind Entity.
         """
         if isinstance(claims, list):
             self.__setClaims__(claims)
