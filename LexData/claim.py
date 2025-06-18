@@ -110,6 +110,8 @@ class Claim(dict):
             return value["id"]
         if vtype == "string":
             return value
+        if vtype == "external-id":
+            return value
         if vtype == "monolingualtext":
             return value["text"]
         if vtype == "quantity":

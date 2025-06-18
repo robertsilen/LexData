@@ -39,6 +39,13 @@ def buildDataValue(datatype: str, value):
             raise TypeError(
                 f"Can not convert type {type(value)} to datatype {datatype}"
             )
+    elif datatype == "external-id":
+        if type(value) == str:
+            return {"value": value, "type": "external-id"}
+        else:
+            raise TypeError(
+                f"Can not convert type {type(value)} to datatype {datatype}"
+            )
     elif datatype in [
         "string",
         "tabular-data",

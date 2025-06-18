@@ -3,6 +3,7 @@ import logging
 from typing import Dict, List, Union
 
 from .claim import Claim
+from .utils import getPropertyType
 from .wikidatasession import WikidataSession
 
 
@@ -87,11 +88,43 @@ class Entity(dict):
         :param idProp: id of the property (example: "P31")
         :param idItem: id of the entity (example: "Q1")
         """
-        entityId = int(idStr[1:])
-        claim_value = json.dumps({"entity-type": "item", "numeric-id": entityId})
-        self.__setClaim__(idProp, claim_value)
+        # Check if this is an external-id property
+        datatype = None
+        try:
+            datatype = getPropertyType(idProp)
+        except Exception:
+            # If we can't get the property type, assume it's an entity
+            pass
+        if datatype == "external-id":
+            # For external-id properties, create a Claim object and use __setClaims__
+            claim = Claim(propertyId=idProp, value=idStr)
+            self.__setClaims__([claim])
+            return
+        # Handle entity-type properties as before
+        if idStr.startswith(('Q', 'P', 'L')):
+            entityId = int(idStr[1:])
+            claim_value = json.dumps({"entity-type": "item", "numeric-id": entityId})
+            self.__setClaim__(idProp, claim_value)
+        else:
+            raise ValueError(f"Invalid entity ID format: {idStr}. Expected Q, P, or L prefix.")
 
     def __setClaim__(self, idProp: str, claim_value):
+        from .utils import getPropertyType
+        import LexData.lexeme
+        is_lexeme = isinstance(self, LexData.lexeme.Lexeme)
+        if isinstance(claim_value, Claim):
+            datatype = getPropertyType(idProp)
+            if datatype == "external-id":
+                claim_value = claim_value.pure_value
+            else:
+                snak_data = claim_value["mainsnak"]
+                claim_value = json.dumps(snak_data["datavalue"])
+        datatype = getPropertyType(idProp)
+        if datatype == "external-id":
+            claim_value_json = json.dumps(claim_value)
+        else:
+            claim_value_json = claim_value
+        # Use wbcreateclaim for both lexemes and other entities
         PARAMS = {
             "action": "wbcreateclaim",
             "format": "json",
@@ -99,7 +132,7 @@ class Entity(dict):
             "snaktype": "value",
             "bot": "1",
             "property": idProp,
-            "value": claim_value,
+            "value": claim_value_json,
             "token": "__AUTO__",
         }
 
