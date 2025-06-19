@@ -8,6 +8,14 @@ power of the access to the internals.
 LexData is still in beta phase and there fore some features are missing and
 functions might be renamed in future.
 
+## Features
+
+- Create and manage Wikidata Lexemes
+- Add forms and senses to lexemes
+- Add claims to lexemes, forms, and senses (including external-id properties)
+- Search and find existing lexemes
+- Support for various Wikidata data types (entities, strings, external-ids, etc.)
+
 The code of AitalvivemBot was used as a starting point, but probably theres not
 a single line of code that wasn't rewritten.
 

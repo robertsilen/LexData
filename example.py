@@ -29,7 +29,7 @@ L2 = LexData.get_or_create_lexeme(repo, "first", en, "Q1084")
 if len(L2.forms) == 0:
     L2.createForm("firsts", ["Q146786"])
 
-# …or senses, with or without additional claims
+# …or senses, with or without additional claims…
 if len(L2.senses) == 0:
     L2.createSense(
         {
@@ -38,3 +38,8 @@ if len(L2.senses) == 0:
         },
         claims={"P5137": ["Q19269277"]},
     )
+
+# …and add external-id claim to lexeme
+if len(L2.claims.get("P12682", [])) == 0:
+    external_id_claim = LexData.Claim(propertyId="P12682", value="example_50bcf7bc0a0ae2bab9011b09139f6f8a")
+    L2.addClaims([external_id_claim])
